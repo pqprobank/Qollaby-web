@@ -1,6 +1,7 @@
 export const navigationLinks = [
   { href: "/", label: "Home" },
   { href: "/rules", label: "Rules" },
+  { href: "/privacy", label: "Privacy" },
   { href: "#download", label: "Download" },
 ] as const;
 
@@ -139,4 +140,17 @@ export const rulesPageSections = [
   { id: "rules", label: "Rules" },
   { id: "reporting", label: "Reporting" },
   { id: "enforcement", label: "Enforcement" },
+] as const;
+
+export const privacyPageSections = [
+  { id: "intro", label: "Introduction" },
+  { id: "info-collected", label: "Information we collect" },
+  { id: "how-used", label: "How we use it" },
+  { id: "sharing", label: "Sharing and disclosure" },
+  { id: "retention", label: "Data retention" },
+  { id: "security", label: "Security" },
+  { id: "children", label: "Children's privacy" },
+  { id: "rights", label: "Your rights" },
+  { id: "changes", label: "Changes to this policy" },
+  { id: "contact", label: "Contact us" },
 ] as const;
