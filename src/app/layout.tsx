@@ -1,5 +1,7 @@
+import { AuthProvider } from "@/contexts/AuthContext";
 import type { Metadata } from "next";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -32,7 +34,25 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full scroll-smooth antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+        <Script id="pricing-bfcache-reload" strategy="beforeInteractive">
+          {`
+(function () {
+  function isPricingPath() {
+    var p = location.pathname || "";
+    return p === "/pricing" || p.indexOf("/pricing/") === 0;
+  }
+  window.addEventListener("pageshow", function (e) {
+    if (!isPricingPath()) return;
+    var nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+    var backFwd = nav && nav.type === "back_forward";
+    if (e.persisted || backFwd) {
+      window.location.reload();
+    }
+  });
+})();
+          `}
+        </Script>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
