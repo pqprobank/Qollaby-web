@@ -6,13 +6,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Collections, databases, FUNCTION_ID, functions, Query } from "@/lib/appwrite";
 import { ExecutionMethod } from "appwrite";
 import {
-    AlertTriangle,
-    ArrowDown,
-    ArrowUp,
-    Check,
-    Crown,
-    Loader2,
-    Zap
+  AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  Check,
+  Crown,
+  Loader2,
+  Zap
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -471,12 +471,10 @@ export default function PricingPage() {
                 const isFree = plan.priceMonthly === 0;
                 const isPopular = plan.slug === "essential";
                 const isCurrentPlan = currentPlanId === plan.$id || (isFree && !currentSub && !!webUser);
-                const nextPlanId = currentSub?.nextPlanId
+                const resolvedNextPlanId = currentSub?.nextPlanId
                   ? typeof currentSub.nextPlanId === "object" ? currentSub.nextPlanId.$id : currentSub.nextPlanId
                   : null;
-                const isUpcomingPlan = !!(nextPlanId && nextPlanId === plan.$id && currentSub?.cancelAtPeriodEnd);
-                const isUpcomingFree = isFree && currentSub?.cancelAtPeriodEnd && !nextPlanId;
-                const isUpcoming = isUpcomingPlan || isUpcomingFree;
+                const isUpcoming = !!(resolvedNextPlanId && resolvedNextPlanId === plan.$id && resolvedNextPlanId !== currentPlanId);
                 const btn = getButtonProps(plan);
 
                 return (
@@ -485,11 +483,9 @@ export default function PricingPage() {
                     className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md ${
                       isCurrentPlan
                         ? "border-[#f5a623] ring-2 ring-[#f5a623]/30"
-                        : isUpcoming
-                          ? "border-blue-500 ring-2 ring-blue-500/30"
-                          : isPopular
-                            ? "border-[#059669] ring-2 ring-[#059669]/20"
-                            : "border-black/8"
+                        : isPopular
+                          ? "border-[#059669] ring-2 ring-[#059669]/20"
+                          : "border-black/8"
                     }`}
                   >
                     {isCurrentPlan && (
@@ -497,12 +493,7 @@ export default function PricingPage() {
                         Your Plan
                       </div>
                     )}
-                    {!isCurrentPlan && isUpcoming && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold text-white">
-                        Upcoming Plan
-                      </div>
-                    )}
-                    {!isCurrentPlan && !isUpcoming && isPopular && (
+                    {!isCurrentPlan && isPopular && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#059669] px-3 py-1 text-xs font-semibold text-white">
                         Most Popular
                       </div>
@@ -519,7 +510,12 @@ export default function PricingPage() {
                           <Crown className="h-5 w-5" style={{ color: accent }} />
                         )}
                       </div>
-                      <h2 className="text-lg font-bold text-[#1d1d1f]">{plan.name}</h2>
+                      <h2 className="text-lg font-bold text-[#1d1d1f]">
+                        {plan.name}
+                        {isUpcoming && (
+                          <span className="ml-1.5 text-sm font-medium text-blue-500">(Up Coming Plan)</span>
+                        )}
+                      </h2>
                     </div>
 
                     <div className="mb-6">
@@ -622,13 +618,21 @@ export default function PricingPage() {
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={() => setModal(null)}
-                className="w-full rounded-xl bg-[#1d1d1f] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#333]"
-              >
-                OK
-              </button>
+              <div className="flex flex-col gap-3">
+                <a
+                  href="qollaby://"
+                  className="flex w-full items-center justify-center rounded-xl bg-[#1d1d1f] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#333]"
+                >
+                  Open Qollaby App
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setModal(null)}
+                  className="w-full rounded-xl bg-gray-100 py-3 text-sm font-semibold text-[#1d1d1f] transition-colors hover:bg-gray-200"
+                >
+                  Stay on Website
+                </button>
+              </div>
             )}
           </div>
         </div>
