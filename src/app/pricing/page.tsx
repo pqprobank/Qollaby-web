@@ -620,7 +620,7 @@ export default function PricingPage() {
             ) : (
               <div className="flex flex-col gap-3">
                 <a
-                  href="qollaby://"
+                  href="qollaby://pricing"
                   className="flex w-full items-center justify-center rounded-xl bg-[#1d1d1f] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#333]"
                 >
                   Open Qollaby App

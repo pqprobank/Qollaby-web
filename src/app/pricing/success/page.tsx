@@ -6,7 +6,7 @@ import { CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const APP_DEEP_LINK = "qollaby://";
+const APP_DEEP_LINK = "qollaby://pricing";
 const REDIRECT_DELAY = 5;
 
 export default function SubscriptionSuccessPage() {
