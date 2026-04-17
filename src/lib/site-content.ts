@@ -197,3 +197,16 @@ export const deleteAccountPageSections = [
   { id: "data-retained", label: "Data we retain" },
   { id: "contact", label: "Contact us" },
 ] as const;
+
+export const childSafetyPageSections = [
+  { id: "commitment", label: "Our commitment" },
+  { id: "prohibited", label: "Prohibited content" },
+  { id: "prevention", label: "How we prevent harm" },
+  { id: "reporting", label: "In-app reporting" },
+  { id: "response", label: "Our response process" },
+  { id: "authorities", label: "Reports to authorities" },
+  { id: "training", label: "Moderator training" },
+  { id: "contact", label: "Contact us" },
+  { id: "hotlines", label: "Legal hotlines" },
+  { id: "updates", label: "Updates" },
+] as const;
