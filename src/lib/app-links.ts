@@ -1,5 +1,16 @@
 export type AppContentType = "post" | "ad" | "exchange";
 
+/** Matches native share links (`hooks/useShare.ts` in the app). */
+export const SHARE_ORIGIN =
+  process.env.NEXT_PUBLIC_SHARE_ORIGIN ?? "https://qollaby.com";
+
+/** iOS automatic App Store fallback if Universal Link didn't open the app. */
+export const IOS_AUTO_STORE_DELAY_MS = 2800;
+
+/** Android: try scheme, then Play Store if tab still foreground. */
+export const ANDROID_CUSTOM_SCHEME_DELAY_MS = 80;
+export const ANDROID_FALLBACK_STORE_DELAY_MS = 1600;
+
 export const APP_STORE_URL =
   process.env.NEXT_PUBLIC_APP_STORE_URL || "https://apps.apple.com/app/qollaby";
 
@@ -12,7 +23,7 @@ export function buildAppDeepLink(type: AppContentType, id: string): string {
 }
 
 export function buildWebUrl(type: AppContentType, id: string): string {
-  return `https://www.qollaby.com/${type}/${id}`;
+  return `${SHARE_ORIGIN.replace(/\/$/, "")}/${type}/${encodeURIComponent(id)}`;
 }
 
 export function detectMobilePlatform(

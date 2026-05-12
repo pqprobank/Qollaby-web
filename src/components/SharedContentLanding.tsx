@@ -80,11 +80,10 @@ export function SharedContentLanding({ type, id }: SharedContentLandingProps) {
             </div>
 
             <p className="mt-8 text-xs leading-6 text-[#9ca3af]">
-              If you have the app, tap{" "}
-              <span className="font-medium text-[#6c727a]">Open in Qollaby app</span>{" "}
-              to try again (iPhone often opens Safari first). Otherwise use{" "}
-              <span className="font-medium text-[#6c727a]">Download</span>{" "}
-              to install Qollaby, then reopen this link.
+              On mobile, this page jumps to Qollaby or the app store
+              automatically. If you tap &quot;Open link&quot;, use it when Qollaby
+              is already installed (Universal Links). First time installing?
+              Prefer the orange &quot;Download&quot; button.
             </p>
           </div>
 
