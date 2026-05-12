@@ -15,18 +15,15 @@ interface OpenInAppRedirectProps {
 }
 
 /**
- * Tries to open the Qollaby native app via the custom URL scheme. If the app
- * doesn't open within a short window (meaning it's most likely not installed),
- * falls back to the appropriate app store.
+ * Android: programmatically tries the custom scheme, then falls back to the Play
+ * Store — Chrome tolerates unknown schemes better than Safari.
  *
- * iOS / Android Universal/App Links will usually intercept the original
- * https://qollaby.com/<type>/<id> URL *before* this page ever renders when
- * the app is installed, so this component is mainly a backup for browsers
- * where Universal Links failed (in-app webviews, desktop, fresh installs
- * before AASA cached, etc).
+ * iOS: never auto-navigates to qollaby://; without the app installed, Safari
+ * shows "invalid URL". Users rely on tapping the HTTPS link (Universal Link
+ * retry) or the App Store button.
  */
 export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
-  const [hasAttempted, setHasAttempted] = useState(false);
+  const [didAndroidAutoAttempt, setDidAndroidAutoAttempt] = useState(false);
   const [platform, setPlatform] = useState<"ios" | "android" | "other">(
     "other",
   );
@@ -38,7 +35,9 @@ export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
     );
     setPlatform(detected);
 
-    if (detected === "other") {
+    /* iOS Safari: skip automatic custom-scheme redirects (Safari blocks them as
+       invalid URLs when the app isn't installed). */
+    if (detected !== "android") {
       return;
     }
 
@@ -50,15 +49,18 @@ export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
     document.addEventListener("visibilitychange", onVisibilityChange);
 
     const deepLink = buildAppDeepLink(type, id);
-    const storeUrl = storeUrlForPlatform(detected);
+    const storeUrl = storeUrlForPlatform("android");
 
     const attemptOpen = () => {
-      setHasAttempted(true);
+      setDidAndroidAutoAttempt(true);
       window.location.href = deepLink;
     };
 
     const fallbackTimer = window.setTimeout(() => {
-      if (!visibilityChangedRef.current && document.visibilityState !== "hidden") {
+      if (
+        !visibilityChangedRef.current &&
+        document.visibilityState !== "hidden"
+      ) {
         window.location.href = storeUrl;
       }
     }, 1500);
@@ -73,12 +75,13 @@ export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
   }, [type, id]);
 
   const storeUrl = storeUrlForPlatform(platform);
-  const deepLink = buildAppDeepLink(type, id);
+  /* Same-origin HTTPS link — retriggers Universal / App Links without Safari blocking */
+  const universalLinkRetryUrl = `/${type}/${encodeURIComponent(id)}`;
 
   return (
     <div className="flex flex-col items-center gap-3">
       <a
-        href={deepLink}
+        href={universalLinkRetryUrl}
         className="inline-flex items-center justify-center rounded-full bg-[#f5a623] px-7 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
       >
         Open in Qollaby app
@@ -89,9 +92,10 @@ export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
       >
         {platform === "android" ? "Get it on Google Play" : "Download on the App Store"}
       </a>
-      {hasAttempted && (
+      {didAndroidAutoAttempt && platform === "android" && (
         <p className="mt-2 text-xs text-[#6c727a]">
-          Didn&apos;t open? Make sure the Qollaby app is installed.
+          Didn&apos;t open? Make sure Qollaby is installed, or use the buttons
+          above.
         </p>
       )}
     </div>
