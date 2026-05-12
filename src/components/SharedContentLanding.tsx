@@ -80,10 +80,9 @@ export function SharedContentLanding({ type, id }: SharedContentLandingProps) {
             </div>
 
             <p className="mt-8 text-xs leading-6 text-[#9ca3af]">
-              On mobile, this page jumps to Qollaby or the app store
-              automatically. If you tap &quot;Open link&quot;, use it when Qollaby
-              is already installed (Universal Links). First time installing?
-              Prefer the orange &quot;Download&quot; button.
+              Mobile flow: try Qollaby first, then the app store — both happen
+              automatically. The orange button retries the HTTPS link if the OS
+              left you in Safari with the app installed.
             </p>
           </div>
 

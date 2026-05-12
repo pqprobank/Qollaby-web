@@ -4,11 +4,11 @@ export type AppContentType = "post" | "ad" | "exchange";
 export const SHARE_ORIGIN =
   process.env.NEXT_PUBLIC_SHARE_ORIGIN ?? "https://qollaby.com";
 
-/** iOS automatic App Store fallback if Universal Link didn't open the app. */
-export const IOS_AUTO_STORE_DELAY_MS = 2800;
+/** Brief pause before attempting `qollaby://` (HTTPS may resolve first). */
+export const CUSTOM_SCHEME_DELAY_MS = 80;
 
-/** Android: try scheme, then Play Store if tab still foreground. */
-export const ANDROID_CUSTOM_SCHEME_DELAY_MS = 80;
+/** Scheme failed / no app → open store if tab still foreground (iOS & Android timings differ slightly). */
+export const IOS_FALLBACK_STORE_DELAY_MS = 2600;
 export const ANDROID_FALLBACK_STORE_DELAY_MS = 1600;
 
 export const APP_STORE_URL =

@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import {
-  ANDROID_CUSTOM_SCHEME_DELAY_MS,
   ANDROID_FALLBACK_STORE_DELAY_MS,
   type AppContentType,
-  IOS_AUTO_STORE_DELAY_MS,
+  CUSTOM_SCHEME_DELAY_MS,
+  IOS_FALLBACK_STORE_DELAY_MS,
   PLAY_STORE_URL,
   buildAppDeepLink,
   buildWebUrl,
@@ -28,17 +28,18 @@ function markHidden(ref: { current: boolean }) {
 }
 
 /**
- * - **Android**: tries custom scheme briefly, then auto-opens Play Store if the
- *   tab is still foreground (installed app normally hides the tab).
- * - **iOS**: never auto-opens `qollaby://` (Safari shows an invalid‑URL alert
- *   when the app isn’t installed). After a delay, auto-opens the App Store if
- *   the web page stayed visible — so “no reaction” resolves without that error.
+ * Automatically tries `qollaby://` first (same expectation on iPhone and Android),
+ * then the correct app store if this tab stays in the foreground.
  *
- * Buttons: HTTPS Universal Link retry + store; copy explains the countdown.
+ * iOS caveat: Safari may briefly show “invalid URL” when the app is not installed;
+ * after dismissal the store opens automatically shortly after unless you already
+ * switched away to Qollaby.
  */
 export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
-  const [didAndroidSchemeAttempt, setDidAndroidSchemeAttempt] = useState(false);
-  const [platform, setPlatform] = useState<"ios" | "android" | "other">("other");
+  const [didSchemeAttempt, setDidSchemeAttempt] = useState(false);
+  const [platform, setPlatform] = useState<"ios" | "android" | "other">(
+    "other",
+  );
   const hiddenRef = useRef(false);
 
   const universalHttpsUrl = buildWebUrl(type, id);
@@ -48,7 +49,9 @@ export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
     const detected = detectMobilePlatform(
       typeof navigator !== "undefined" ? navigator.userAgent : null,
     );
-    setPlatform(detected);
+    queueMicrotask(() => {
+      setPlatform(detected);
+    });
     hiddenRef.current = false;
 
     const onVisibility = () => {
@@ -61,7 +64,7 @@ export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("pagehide", onPageHide);
 
-    if (detected === "other") {
+    if (detected !== "ios" && detected !== "android") {
       return () => {
         document.removeEventListener("visibilitychange", onVisibility);
         window.removeEventListener("pagehide", onPageHide);
@@ -70,36 +73,28 @@ export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
 
     markHidden(hiddenRef);
 
-    if (detected === "ios") {
-      const store = storeUrlForPlatform("ios");
-      const t = window.setTimeout(() => {
-        if (hiddenRef.current || document.visibilityState !== "visible") {
-          return;
-        }
-        window.location.assign(store);
-      }, IOS_AUTO_STORE_DELAY_MS);
-
-      return () => {
-        window.clearTimeout(t);
-        document.removeEventListener("visibilitychange", onVisibility);
-        window.removeEventListener("pagehide", onPageHide);
-      };
-    }
-
     const deepLink = buildAppDeepLink(type, id);
-    const play = storeUrlForPlatform("android");
+    const store =
+      detected === "ios"
+        ? storeUrlForPlatform("ios")
+        : storeUrlForPlatform("android");
+
+    const fallbackDelay =
+      detected === "ios"
+        ? IOS_FALLBACK_STORE_DELAY_MS
+        : ANDROID_FALLBACK_STORE_DELAY_MS;
 
     const trySchemeTimer = window.setTimeout(() => {
-      setDidAndroidSchemeAttempt(true);
+      setDidSchemeAttempt(true);
       window.location.href = deepLink;
-    }, ANDROID_CUSTOM_SCHEME_DELAY_MS);
+    }, CUSTOM_SCHEME_DELAY_MS);
 
     const storeTimer = window.setTimeout(() => {
       if (hiddenRef.current || document.visibilityState !== "visible") {
         return;
       }
-      window.location.assign(play);
-    }, ANDROID_FALLBACK_STORE_DELAY_MS);
+      window.location.assign(store);
+    }, fallbackDelay);
 
     return () => {
       window.clearTimeout(trySchemeTimer);
@@ -110,23 +105,7 @@ export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
   }, [type, id]);
 
   const actionButtons =
-    platform === "ios" ? (
-      <>
-        <a
-          href={storeUrl}
-          className="inline-flex min-h-[44px] min-w-[200px] items-center justify-center rounded-full bg-[#f5a623] px-7 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
-        >
-          Download Qollaby
-        </a>
-        <a
-          href={universalHttpsUrl}
-          rel="noopener noreferrer"
-          className="inline-flex min-h-[44px] min-w-[200px] items-center justify-center rounded-full border border-black/8 px-7 py-3 text-sm font-semibold text-[#1d1d1f] transition-colors hover:bg-black/[0.03]"
-        >
-          Already using the app? Open link
-        </a>
-      </>
-    ) : platform === "android" ? (
+    platform === "ios" || platform === "android" ? (
       <>
         <a
           href={universalHttpsUrl}
@@ -139,7 +118,9 @@ export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
           href={storeUrl}
           className="inline-flex min-h-[44px] min-w-[200px] items-center justify-center rounded-full border border-black/8 px-7 py-3 text-sm font-semibold text-[#1d1d1f] transition-colors hover:bg-black/[0.03]"
         >
-          Get it on Google Play
+          {platform === "android"
+            ? "Get it on Google Play"
+            : "Download on the App Store"}
         </a>
       </>
     ) : (
@@ -164,32 +145,33 @@ export function OpenInAppRedirect({ type, id }: OpenInAppRedirectProps) {
       </p>
     );
 
+  const storeName =
+    platform === "android" ? "Google Play" : "the App Store";
+
   return (
     <div className="flex flex-col items-center gap-4">
       {platform !== "other" && (
         <p className="max-w-[20rem] text-center text-xs leading-5 text-[#6c727a]">
+          We try to launch Qollaby automatically via the app deep link (same URL
+          the app listens for); if you stay here,{" "}
+          <strong className="text-[#50555c]">{storeName}</strong> opens next.
           {platform === "ios" ? (
             <>
-              In a moment we&apos;ll take you to the{" "}
-              <strong className="text-[#50555c]">App Store</strong> if Qollaby
-              didn&apos;t open. Tap below to go right away.
+              {" "}
+              If Qollaby isn&apos;t installed, Safari may briefly show{' '}
+              &quot;invalid URL&quot;
+              {" — dismiss it."}
             </>
-          ) : (
-            <>
-              If Qollaby doesn&apos;t open, we&apos;ll send you to{" "}
-              <strong className="text-[#50555c]">Google Play</strong> — tap
-              anytime below.
-            </>
-          )}
+          ) : null}
         </p>
       )}
 
       <div className="flex flex-col items-center gap-3">{actionButtons}</div>
 
-      {didAndroidSchemeAttempt && platform === "android" && (
+      {didSchemeAttempt && platform !== "other" && (
         <p className="max-w-[19rem] text-center text-[11px] leading-5 text-[#9ca3af]">
-          If Qollaby is installed but didn&apos;t open, we&apos;ll open the Play
-          Store next — reinstall if needed.
+          Use the outlined button for the store sooner, or the orange HTTPS
+          button if the app stayed in Safari instead of handing off.
         </p>
       )}
     </div>
