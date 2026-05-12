@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { SharedContentLanding } from "@/components/SharedContentLanding";
-import { buildWebUrl } from "@/lib/app-links";
+import { buildAppleItunesAppMeta, buildWebUrl } from "@/lib/app-links";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -15,6 +15,8 @@ export async function generateMetadata({
   const title = "Sponsor ad on Qollaby";
   const description =
     "View this Qollaby sponsor ad. Open it in the Qollaby app for full details and to contact the sponsor.";
+
+  const appleItunesApp = buildAppleItunesAppMeta("ad", id);
 
   return {
     title,
@@ -34,6 +36,9 @@ export async function generateMetadata({
       description,
       images: ["/images/screenshot-sponsors.png"],
     },
+    ...(appleItunesApp
+      ? { other: { "apple-itunes-app": appleItunesApp } }
+      : {}),
   };
 }
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { SharedContentLanding } from "@/components/SharedContentLanding";
-import { buildWebUrl } from "@/lib/app-links";
+import { buildAppleItunesAppMeta, buildWebUrl } from "@/lib/app-links";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -15,6 +15,8 @@ export async function generateMetadata({
   const title = "Post on Qollaby";
   const description =
     "View this Qollaby community post. Open it in the Qollaby app to comment or message the poster.";
+
+  const appleItunesApp = buildAppleItunesAppMeta("post", id);
 
   return {
     title,
@@ -34,6 +36,9 @@ export async function generateMetadata({
       description,
       images: ["/images/screenshot-discover.png"],
     },
+    ...(appleItunesApp
+      ? { other: { "apple-itunes-app": appleItunesApp } }
+      : {}),
   };
 }
 

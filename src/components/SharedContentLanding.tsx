@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 
+import { AutoOpenInApp } from "@/components/AutoOpenInApp";
 import { OpenInAppRedirect } from "@/components/OpenInAppRedirect";
-import { AppContentType } from "@/lib/app-links";
+import { AppContentType, detectMobilePlatform } from "@/lib/app-links";
 
 interface SharedContentLandingProps {
   type: AppContentType;
@@ -33,8 +35,13 @@ const TYPE_COPY: Record<
   },
 };
 
-export function SharedContentLanding({ type, id }: SharedContentLandingProps) {
+export async function SharedContentLanding({
+  type,
+  id,
+}: SharedContentLandingProps) {
   const copy = TYPE_COPY[type];
+  const headersList = await headers();
+  const platform = detectMobilePlatform(headersList.get("user-agent"));
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -76,12 +83,14 @@ export function SharedContentLanding({ type, id }: SharedContentLandingProps) {
             </p>
 
             <div className="mt-8">
-              <OpenInAppRedirect type={type} id={id} />
+              <OpenInAppRedirect type={type} id={id} platform={platform} />
             </div>
+            <AutoOpenInApp type={type} id={id} platform={platform} />
 
             <p className="mt-8 text-xs leading-6 text-[#9ca3af]">
-              If you already have the app installed, it should open automatically.
-              Otherwise you can install Qollaby and open the link again.
+              Trying to open the Qollaby app… If nothing happens, tap{" "}
+              <strong>Open in Qollaby app</strong> above, or install Qollaby
+              from the app store.
             </p>
           </div>
 
