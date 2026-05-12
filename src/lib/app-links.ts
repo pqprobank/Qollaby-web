@@ -1,20 +1,5 @@
 export type AppContentType = "post" | "ad" | "exchange";
 
-/** Matches native share links (`hooks/useShare.ts` in the app). */
-export const SHARE_ORIGIN =
-  process.env.NEXT_PUBLIC_SHARE_ORIGIN ?? "https://qollaby.com";
-
-/** Brief pause before attempting `qollaby://` (HTTPS may resolve first). */
-export const CUSTOM_SCHEME_DELAY_MS = 80;
-
-/** Heuristic after custom-scheme delay: tab still foreground → assume app not launched. */
-export const LIKELY_NOT_INSTALLED_AFTER_MS = 2600;
-
-/**
- * Android only — iOS timers to the App Store overlap with Safari’s handoff sheet (“Open”).
- */
-export const ANDROID_FALLBACK_STORE_DELAY_MS = 1600;
-
 export const APP_STORE_URL =
   process.env.NEXT_PUBLIC_APP_STORE_URL || "https://apps.apple.com/app/qollaby";
 
@@ -27,7 +12,7 @@ export function buildAppDeepLink(type: AppContentType, id: string): string {
 }
 
 export function buildWebUrl(type: AppContentType, id: string): string {
-  return `${SHARE_ORIGIN.replace(/\/$/, "")}/${type}/${encodeURIComponent(id)}`;
+  return `https://www.qollaby.com/${type}/${id}`;
 }
 
 export function detectMobilePlatform(

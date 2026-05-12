@@ -79,10 +79,9 @@ export function SharedContentLanding({ type, id }: SharedContentLandingProps) {
               <OpenInAppRedirect type={type} id={id} />
             </div>
 
-            <p lang="zh-Hans" className="mt-8 text-xs leading-6 text-[#9ca3af]">
-              我们不会替换 Safari
-              / 系统的文案；若在尝试打开后你仍停在当前页，会提示「可能尚未安装」并提供商店按钮。（iPhone
-              不会定时自动跳进商店，以避免与系统的「打开」叠在一起。）
+            <p className="mt-8 text-xs leading-6 text-[#9ca3af]">
+              If you already have the app installed, it should open automatically.
+              Otherwise you can install Qollaby and open the link again.
             </p>
           </div>
 
