@@ -7,8 +7,12 @@ export const SHARE_ORIGIN =
 /** Brief pause before attempting `qollaby://` (HTTPS may resolve first). */
 export const CUSTOM_SCHEME_DELAY_MS = 80;
 
-/** Scheme failed / no app → open store if tab still foreground (iOS & Android timings differ slightly). */
-export const IOS_FALLBACK_STORE_DELAY_MS = 2600;
+/** Heuristic after custom-scheme delay: tab still foreground → assume app not launched. */
+export const LIKELY_NOT_INSTALLED_AFTER_MS = 2600;
+
+/**
+ * Android only — iOS timers to the App Store overlap with Safari’s handoff sheet (“Open”).
+ */
 export const ANDROID_FALLBACK_STORE_DELAY_MS = 1600;
 
 export const APP_STORE_URL =
