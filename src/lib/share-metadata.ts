@@ -114,7 +114,12 @@ export async function fetchShareOgPayload(
     const description = truncate(desc, 220);
     const imageUrl = firstStillImageUrl(rec.media, undefined);
     return { title, description, imageUrl };
-  } catch {
+  } catch (e: unknown) {
+    const msg =
+      e && typeof e === "object" && "message" in e
+        ? String((e as { message: unknown }).message)
+        : String(e);
+    console.error("[share-metadata] fetch failed", { type, id, msg });
     return null;
   }
 }
