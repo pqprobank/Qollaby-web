@@ -2,19 +2,25 @@ import type { Metadata } from "next";
 
 import { SharedContentLanding } from "@/components/SharedContentLanding";
 import { buildAppleItunesAppMeta, buildWebUrl } from "@/lib/app-links";
+import { fetchShareOgPayload } from "@/lib/share-metadata";
 
 interface PageParams {
   params: Promise<{ id: string }>;
 }
+
+const STATIC_OG_IMAGE = "/images/screenshot-exchange.png";
 
 export async function generateMetadata({
   params,
 }: PageParams): Promise<Metadata> {
   const { id } = await params;
   const url = buildWebUrl("exchange", id);
-  const title = "Exchange listing on Qollaby";
+  const payload = await fetchShareOgPayload("exchange", id);
+  const title = payload?.title ?? "Exchange listing on Qollaby";
   const description =
+    payload?.description ??
     "View this Qollaby exchange listing. Open it in the Qollaby app to see the details and message the lister.";
+  const ogImages = payload?.imageUrl ? [payload.imageUrl] : [STATIC_OG_IMAGE];
 
   const appleItunesApp = buildAppleItunesAppMeta("exchange", id);
 
@@ -27,14 +33,14 @@ export async function generateMetadata({
       description,
       url,
       siteName: "Qollaby",
-      images: ["/images/screenshot-exchange.png"],
+      images: ogImages,
       type: "article",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ["/images/screenshot-exchange.png"],
+      images: ogImages,
     },
     ...(appleItunesApp
       ? { other: { "apple-itunes-app": appleItunesApp } }
