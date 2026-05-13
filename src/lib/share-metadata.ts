@@ -40,7 +40,8 @@ function truncate(s: string, max: number): string {
 function getServerDatabases(): { databases: Databases; databaseId: string } | null {
   const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
   const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
-  const apiKey = process.env.APPWRITE_API_KEY;
+  const apiKey =
+    process.env.APPWRITE_API_KEY ?? process.env.EXPO_PUBLIC_APPWRITE_API_KEY;
   const databaseId =
     process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID ?? process.env.APPWRITE_DATABASE_ID;
   if (!endpoint || !projectId || !apiKey || !databaseId) return null;
